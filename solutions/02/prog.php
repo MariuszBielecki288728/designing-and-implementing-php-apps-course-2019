@@ -1,18 +1,22 @@
 <?php 
-final class Number 
+final class Number
 {
     private $numberValue;
     private $base;
 
-    public function __contruct(string $number, int $base)
+    public function __construct($number, int $base)
     {
-        $this->numberValue = intval(base_convert($number), $base);
+        if (is_int($number)) {
+            $this->numberValue = $number;
+        } else {
+            $this->numberValue = intval($number, $base);
+        }
         $this->base = $base;
     }
 
-    public function convert_base_to(int $base): Number 
+    public function convert_base_to(int $base): Number
     {
-        $this->base = base;
+        return new Number($this->numberValue, $base);
     }
 
     public function add(Number $num): Number
@@ -28,7 +32,11 @@ final class Number
     {
         return $this->numberValue;
     }
-    
+
+    public function get_representation(): string
+    {
+        return base_convert(strval($this->numberValue), 10, $this->base);
+    }    
 }
 
 interface NumberFormatter 
@@ -55,3 +63,14 @@ class RomanFormatter implements NumberFormatter
         return $returnValue;
     }
 }
+
+$formatter = new RomanFormatter();
+$res = new Number(0, 10);
+
+for ($i=1; $i < $argc; $i++) {
+    $splitted_string = explode(":", $argv[$i]);
+    $num = new Number($splitted_string[0], intval($splitted_string[1]));
+    $res = $res->add($num->convert_base_to(10));
+}
+echo $res->get_representation()."\n";
+echo $formatter->format_to_string($res)."\n";
